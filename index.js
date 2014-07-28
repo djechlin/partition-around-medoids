@@ -1,5 +1,7 @@
 "use strict";
 
+var KMedoids = require('./kmedoids.js');
+
 module.exports = function(data, metric, numberOfMedoids) {
 	// generate matrix
 
@@ -9,6 +11,10 @@ module.exports = function(data, metric, numberOfMedoids) {
 		});
 	});
 
-	return new KMedoids(data.length, distances, numberOfMedoids).run();
+	return new KMedoids(data.length, distances, numberOfMedoids).run().map(function(cluster) {
+		return cluster.map(function(index) {
+			return data[index];
+		});
+	});
 
-}
+};

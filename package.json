@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/djechlin/partition-around-medoids/issues"
   },
-  "homepage": "https://github.com/djechlin/partition-around-medoids"
+  "homepage": "https://github.com/djechlin/partition-around-medoids",
+  "devDependencies": {
+    "mocha": "^1.21.3"
+  }
 }
