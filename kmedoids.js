@@ -10,6 +10,14 @@ function shuffle(array) {
 	return array;
 }
 
+function rand(n) {
+	return Math.floor(Math.random() * n);
+}
+
+function randomElement(array) {
+	return array[rand(array.length)];
+}
+
 function range(bound) {
 	return Array.apply(null, {length: bound}).map(Number.call, Number);
 }
@@ -60,16 +68,17 @@ KMedoids.prototype.assign = function(medoids) {
 	for (var object = 0; object < this.size; object++) {
 
 		var bestDistance = Infinity;
-		var bestMedoids = [];
+		var bestMedoidIndices = [];
 
-		for (var medoid = 0; medoid < this.numberOfMedoids; medoid++) {
+		for (var medoidIndex = 0; medoidIndex < this.numberOfMedoids; medoidIndex++) {
+			var medoid = medoids[medoidIndex];
 			var distance = this.distances[medoid][object];
 			if(distance === bestDistance) {
-				bestMedoids.push(medoid);
+				bestMedoidIndices.push(medoidIndex);
 			}
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				bestMedoids = [medoid];
+				bestMedoidIndices = [medoidIndex];
 			}
 		}
 
@@ -77,30 +86,36 @@ KMedoids.prototype.assign = function(medoids) {
 		// since even distribution works better for this algorithm
 		// may choose first cluster among tie
 
-		var smallestCluster;
+		var smallestCluster = [];
 		var smallestSize = Infinity;
 
-		bestMedoids.forEach(function(bestMedoid) {
-			if(clusters[bestMedoid].length < smallestSize) {
-				smallestSize = clusters[bestMedoid].length;
-				smallestCluster = clusters[bestMedoid];
+		bestMedoidIndices.forEach(function(bestMedoidIndex) {
+			var bestMedoid = medoids[bestMedoidIndex];
+
+			if(clusters[bestMedoidIndex].length === smallestSize) {
+				smallestCluster.push(clusters[bestMedoidIndex]);
+			}
+
+			else if(clusters[bestMedoidIndex].length < smallestSize) {
+				smallestSize = clusters[bestMedoidIndex].length;
+				smallestCluster = [clusters[bestMedoidIndex]];
 			}
 		});
 
-		smallestCluster.push(object);
+		randomElement(smallestCluster).push(object);
 	}
 
 	return clusters;
 };
 
 KMedoids.prototype.randomMedoids = function() {
-	return shuffle(range(this.size)).slice(this.numberOfMedoids);
+	return shuffle(range(this.size)).slice(0, this.numberOfMedoids);
 };
 
 
 KMedoids.prototype.optimizeCluster = function(cluster) {
 	var bestTotalDistance = Infinity;
-	var bestMedoid = -1;
+	var bestMedoids = [];
 
 	var self = this;
 
@@ -112,11 +127,16 @@ KMedoids.prototype.optimizeCluster = function(cluster) {
 			totalDistance += self.distances[clusterNode][candidateMedoid];
 		});
 
-		if (totalDistance < bestTotalDistance) {
-			totalDistance = bestTotalDistance;
-			bestMedoid = candidateMedoid;
+		if(totalDistance === bestTotalDistance) {
+			bestMedoids.push(candidateMedoid);
+		}
+
+		else if (totalDistance < bestTotalDistance) {
+			bestTotalDistance = totalDistance;
+			bestMedoids = [candidateMedoid];
 		}
 	});
 
-	return bestMedoid;
+	var best = randomElement(bestMedoids);
+	return best;
 };
